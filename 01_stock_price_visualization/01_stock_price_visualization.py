@@ -2,37 +2,48 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import yfinance as yf
 
-# 取得日数
 days = 20
+tickers = {
+    "apple": "AAPL",
+    "facebook": "FB",
+    "google": "GOOGL",
+    "microsoft": "MSFT",
+    "netflix": "NFLX",
+    "amazon": "AMZN"
+}
 
-# ティッカーシンボル指定で株価を取得する
-aapl = yf.Ticker('AAPL')
+# 株価取得関数
+def get_data(days, tickers):
+    
+    # 空のデータフレームを用意
+    df = pd.DataFrame()
 
-# 指定日数分のデータ取得
-hist_aapl = aapl.history(period=f'{days}d')
+    for company in tickers.keys():
 
-# 行列数を確認
-# hist_aapl.shape
-# 列定義を確認
-# hist_aapl.columns
-# 日付がindexになっているため、リセットしてみる
-# r_hist = hist_aapl.reset_index()
-# r_hist
+        # 指定日数分の株価取得
+        tkr = tickers[company]
+        stock_price = yf.Ticker(tkr)
+        hist = stock_price.history(period=f'{days}d')
 
-# 日付フォーマット修正
-hist_aapl.index = hist_aapl.index.strftime('%d %B %Y')
+        # 日付フォーマット修正
+        hist.index = hist.index.strftime('%d %B %Y')
 
-# データを終値のみとする
-hist_aapl = hist_aapl[['Close']]
+        # データを終値のみとする
+        hist = hist[['Close']]
 
-# カラム名変更
-hist_aapl.columns = ['apple']
+        # カラム名変更
+        hist.columns = [company]
 
-# 行列変換
-hist_aapl = hist_aapl.T
+        # 行列変換
+        hist = hist.T
 
-# インデックスのカラム名を変更
-hist_aapl.index.name = 'Company'
+        # インデックスのカラム名を変更
+        hist.index.name = 'Company'
 
-# データ表示
-hist_aapl
+        # データフレームに追加
+        df = pd.concat([df, hist])
+
+    return df
+
+df = get_data(days, tickers)
+df
